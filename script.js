@@ -1,12 +1,20 @@
-// script.js
-import { db } from "./firebase-config.js";
-import { collection, doc, getDocs, setDoc, onSnapshot, runTransaction } from "firebase/firestore";
+// ======= Firebase Config =======
+const firebaseConfig = {
+  apiKey: "AIzaSyCPxTdg3q8WGdg6BkckdlnWorrqXeCVhZE",
+  authDomain: "lastxalive.firebaseapp.com",
+  projectId: "lastxalive",
+  storageBucket: "lastxalive.appspot.com",
+  messagingSenderId: "763530458403",
+  appId: "1:763530458403:web:e168d85c9178f42858c896",
+  measurementId: "G-ZDBWQYTCVP"
+};
 
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-
-// Hero data
+// ======= Hero Data (Local Images) =======
 const heroes = [
-  { id: "1", name: "X", img: "images/x.jpg", votes: 100 },
+  { id: "1", name: "X", img: "images/x.jpg", votes: 0 },
   { id: "2", name: "Queen", img: "images/queen.jpg", votes: 0 },
   { id: "3", name: "Dragon Boy", img: "images/dragon.jpg", votes: 0 },
   { id: "4", name: "Ghostblade", img: "images/ghost.jpg", votes: 0 },
@@ -20,16 +28,15 @@ const heroes = [
 ];
 
 const heroesContainer = document.getElementById("heroes-container");
-const topHeroDiv = document.getElementById("top-hero");
+const topHeroContainer = document.getElementById("top-hero-container");
 
-// Initialize Firestore heroes collection
+// ======= Initialize Heroes in Firestore =======
 async function initializeHeroes() {
-  const snapshot = await getDocs(collection(db, "heroes"));
+  const snapshot = await db.collection("heroes").get();
   if (snapshot.empty) {
     for (const hero of heroes) {
-      await setDoc(doc(db, "heroes", hero.id), {
+      await db.collection("heroes").doc(hero.id).set({
         name: hero.name,
-        img: hero.img,
         votes: hero.votes
       });
     }
@@ -38,48 +45,51 @@ async function initializeHeroes() {
 }
 initializeHeroes();
 
-// Listen for real-time updates
-const heroesCol = collection(db, "heroes");
-onSnapshot(heroesCol, snapshot => {
-  const updatedHeroes = [];
-  snapshot.forEach(docSnap => updatedHeroes.push({ id: docSnap.id, ...docSnap.data() }));
-  renderHeroes(updatedHeroes);
-});
-
-// Render heroes
+// ======= Render Heroes =======
 function renderHeroes(heroList) {
   heroList.sort((a, b) => b.votes - a.votes);
 
-  heroesContainer.innerHTML = "";
-  topHeroDiv.innerHTML = "";
-
-  const top = heroList[0];
-  topHeroDiv.innerHTML = `
-    <div>
-      <img src="${top.img}" alt="${top.name}" />
-      <h2>${top.name} - Rank 1 🥇 (${top.votes} votes)</h2>
+  // Top hero
+  const topHero = heroList[0];
+  const topHeroImg = heroes.find(h => h.id === topHero.id).img;
+  topHeroContainer.innerHTML = `
+    <div class="hero-card" onclick="vote('${topHero.id}')">
+      <div class="rank">#1</div>
+      <img src="${topHeroImg}" alt="${topHero.name}" />
+      <p>${topHero.name} (${topHero.votes} votes)</p>
     </div>
   `;
 
+  // Remaining heroes
+  heroesContainer.innerHTML = "";
   heroList.slice(1).forEach((hero, index) => {
-    heroesContainer.innerHTML += `
-      <div class="hero-card" onclick="vote('${hero.id}')">
-        <img src="${hero.img}" alt="${hero.name}" />
-        <div class="rank">#${index + 2}</div>
-        <p>${hero.name} (${hero.votes})</p>
-      </div>
+    const heroImg = heroes.find(h => h.id === hero.id).img;
+    const card = document.createElement("div");
+    card.className = "hero-card";
+    card.innerHTML = `
+      <div class="rank">#${index + 2}</div>
+      <img src="${heroImg}" alt="${hero.name}" />
+      <p>${hero.name} (${hero.votes} votes)</p>
     `;
+    card.onclick = () => vote(hero.id);
+    heroesContainer.appendChild(card);
   });
 }
 
-// Voting system
-async function vote(id) {
-  const heroRef = doc(db, "heroes", id);
+// ======= Real-Time Firestore Updates =======
+db.collection("heroes").onSnapshot(snapshot => {
+  const updatedHeroes = [];
+  snapshot.forEach(doc => updatedHeroes.push({ id: doc.id, ...doc.data() }));
+  renderHeroes(updatedHeroes);
+});
 
+// ======= Voting Function =======
+async function vote(id) {
+  const heroRef = db.collection("heroes").doc(id);
   try {
-    await runTransaction(db, async (transaction) => {
+    await db.runTransaction(async (transaction) => {
       const heroDoc = await transaction.get(heroRef);
-      if (!heroDoc.exists()) return;
+      if (!heroDoc.exists) return;
       const newVotes = (heroDoc.data().votes || 0) + 1;
       transaction.update(heroRef, { votes: newVotes });
     });
