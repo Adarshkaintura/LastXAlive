@@ -15,7 +15,7 @@ const db = firebase.firestore();
 // ======= Hero Data (Local Images) =======
 const heroes = [
   { id: "1", name: "X", img: "images/x.jpg", votes: 0 },
-  { id: "2", name: "Queen", img: "images/queen.jpg", votes: 0 },
+  { id: "2", name: "Queen", img: "images/queen.webp", votes: 0 },
   { id: "3", name: "Dragon Boy", img: "images/dragon.jpg", votes: 0 },
   { id: "4", name: "Ghostblade", img: "images/ghost.jpg", votes: 0 },
   { id: "5", name: "The Johnnies", img: "images/jhonnies.png", votes: 0 },
@@ -97,3 +97,4 @@ async function vote(id) {
     console.error("Vote failed: ", error);
   }
 }
+
