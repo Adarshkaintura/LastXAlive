@@ -44,23 +44,41 @@ body, html {
 }
 
 /* ========== TOP HERO ========== */
-#top-hero img {
-  width: 280px;
+#top-hero-container .hero-card {
+  width: 300px;
+  margin: 0 auto 30px auto;
+  cursor: pointer;
+}
+
+#top-hero-container .hero-card img {
+  width: 100%;
   border-radius: 20px;
-  border: 3px solid gold;
-  margin-bottom: 1rem;
+  border: 4px solid gold;
   transition: transform 0.3s;
 }
 
-#top-hero img:hover {
+#top-hero-container .hero-card img:hover {
   transform: scale(1.05);
 }
 
-#top-hero h2 {
-  font-size: 1.5rem;
+#top-hero-container .hero-card p {
   margin-top: 0.5rem;
+  font-weight: 700;
   color: gold;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.7);
+  font-size: 1.3rem;
+}
+
+#top-hero-container .rank {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: crimson;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 /* ========== HERO GRID ========== */
@@ -69,7 +87,6 @@ body, html {
   flex-wrap: wrap;
   justify-content: center;
   gap: 25px;
-  margin-top: 2rem;
 }
 
 .hero-card {
@@ -78,6 +95,8 @@ body, html {
   transition: 0.3s ease;
   cursor: pointer;
   border-radius: 15px;
+  background: rgba(0,0,0,0.3);
+  padding: 5px;
 }
 
 .hero-card img {
@@ -99,10 +118,10 @@ body, html {
 
 .rank {
   position: absolute;
-  bottom: 8px;
+  top: 8px;
   left: 8px;
-  background: crimson;
-  color: white;
+  background: gold;
+  color: black;
   padding: 4px 10px;
   border-radius: 5px;
   font-weight: bold;
@@ -114,7 +133,7 @@ body, html {
     font-size: 2rem;
   }
 
-  #top-hero img {
+  #top-hero-container .hero-card {
     width: 200px;
   }
 
